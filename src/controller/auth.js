@@ -6,25 +6,35 @@ import { comparedPassword, hashPassword } from "../utils/helpers.js";
 import { validationResult, matchedData } from 'express-validator';
 
 export const Home = async (req, res) => {
-    const token = req.cookies?.access_token;
+ const token = req.cookies?.access_token;
+    // console.log(token)
     if (!token) {
         return res.status(200).send({ msg: 'Welcome! Please login.' });
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id).select('-password'); // loại bỏ password
+        if (!user) {
+            return res.status(404).send({ msg: 'User not found. Please login again.' });
+        }
         const listtask = await Task.find({ createdBy: decoded.id });
-        res.status(200).send({
+        return res.status(200).send({
             msg: listtask.length === 0 ? 'Welcome! No tasks found.' : 'Welcome back!',
-            user: { id: decoded.id, username: decoded.username },
+            user: {
+                id: user._id,
+                username: user.username,
+                fullname: user.fullname,
+                role: user.role
+            },
             tasks: listtask,
+            totalTasks: listtask.length
         });
+
     } catch (err) {
         console.error('JWT Error:', err.message);
         return res.status(401).send({ msg: 'Invalid or expired token. Please login again.' });
     }
-}
-
-
+};
 export const getRegister = async (req, res) => {
     const result = validationResult(req)
     if (!result.isEmpty()) {
