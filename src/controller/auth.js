@@ -20,14 +20,14 @@ export const Home = async (req, res) => {
         const listtask = await Task.find({ createdBy: decoded.id });
         return res.status(200).send({
             msg: listtask.length === 0 ? 'Welcome! No tasks found.' : 'Welcome back!',
-            user: {
-                id: user._id,
-                username: user.username,
-                fullname: user.fullname,
-                role: user.role
-            },
+            // user: {
+            //     id: user._id,
+            //     username: user.username,
+            //     fullname: user.fullname,
+            //     role: user.role
+            // },
             tasks: listtask,
-            totalTasks: listtask.length
+            // totalTasks: listtask.length
         });
 
     } catch (err) {

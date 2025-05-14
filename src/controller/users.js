@@ -61,7 +61,7 @@ export const getUpdateUser =async (req, res) => {
 
 export const getDeleteUserByPatch = async (req, res) => {
   if (!req.user) return res.sendStatus(401);
-  const user = req.userData;
+  const user = req.user;
   user.status = 'inactive'
   try {
     const updateStatusUser = await user.save();
@@ -75,7 +75,7 @@ export const getDeleteUserByPatch = async (req, res) => {
 export const getDeleteUser=async (req, res) => {
   if (!req.user) return res.sendStatus(401);
   try {
-    await req.userData.deleteOne();
+    await req.user.deleteOne();
     res.send({ msg: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete error:', err);

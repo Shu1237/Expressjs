@@ -30,7 +30,7 @@ export const checkRequestUser =async (req,res,next)=>{
     if (!user) {
       return res.status(404).send({ msg: 'User not found' });
     }
-    req.userData = user;
+    req.user = user;
     next(); 
   } catch (error) {
     console.error('Error checking user:', error);
