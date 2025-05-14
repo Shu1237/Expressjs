@@ -10,7 +10,6 @@ router.get('/',Home);
 //create 
 router.post('/register', createAccountSchema,getRegister)
 router.post('/login',LoginUser );
-router.get('/login/status',LoginStatus );
 router.post('/logout',Logout);
 
 

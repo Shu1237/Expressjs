@@ -6,7 +6,7 @@ import { comparedPassword, hashPassword } from "../utils/helpers.js";
 import { validationResult, matchedData } from 'express-validator';
 
 export const Home = async (req, res) => {
-    const token = req.cookies?.token;
+    const token = req.cookies?.access_token;
     if (!token) {
         return res.status(200).send({ msg: 'Welcome! Please login.' });
     }
@@ -25,16 +25,16 @@ export const Home = async (req, res) => {
 }
 
 
-export const getRegister = async (request, response) => {
-    const result = validationResult(request)
+export const getRegister = async (req, res) => {
+    const result = validationResult(req)
     if (!result.isEmpty()) {
-        return response.status(400).send({ error: result.array() })
+        return res.status(400).send({ error: result.array() })
     }
 
-    const data = matchedData(request);
+    const data = matchedData(req);
     const existingUser = await User.findOne({ username: data.username });
     if (existingUser) {
-        return response.status(409).send({
+        return res.status(409).send({
             message: 'Username already exists'
         });
     }
@@ -43,13 +43,13 @@ export const getRegister = async (request, response) => {
     const newUser = User(data)
     try {
         const savedUser = await newUser.save();
-        return response.status(201).send({
+        return res.status(201).send({
             message: 'Create Successful',
             user: savedUser
         });
     } catch (error) {
         console.log('Error creating user:', error);
-        return response.status(400).send({ message: 'Create Failed', error: error.message });
+        return res.status(400).send({ message: 'Create Failed', error: error.message });
     }
 }
 export const LoginUser = async (req, res) => {
@@ -83,13 +83,6 @@ export const LoginUser = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
-export const LoginStatus = (req, res) => {
-    if (req.isAuthenticated()) {
-        return res.status(200).send(req.user);
-    } else {
-        return res.status(401).send({ msg: 'Not Authenticated' });
-    }
-}
 export const Logout = (req, res) => {
     res.clearCookie('access_token', {
         httpOnly: true,
