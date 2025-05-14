@@ -26,33 +26,7 @@ export const getUsers = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-export const getRegister = async (request, response) => {
-    const result = validationResult(request);
-    if (!result.isEmpty()) {
-        return response.status(400).send({ error: result.array() })
-    }
 
-    const data = matchedData(request);
-    const existingUser = await User.findOne({ username: data.username });
-    if (existingUser) {
-        return response.status(409).json({
-            message: 'Username already exists'
-        });
-    }
-    // console.log(data)
-    data.password = hashPassword(data.password)
-    const newUser = User(data)
-    try {
-        const savedUser = await newUser.save();
-        return response.status(201).send({
-            message: 'Create Successful',
-            user: savedUser
-        });
-    } catch (error) {
-        console.log('Error creating user:', error);
-        return response.status(400).send({ message: 'Create Failed', error: error.message });
-    }
-}
 export const getUpdateUser =async (req, res) => {
   if (!req.user) return res.sendStatus(401);
 

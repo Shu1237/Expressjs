@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { createAccountSchema, updateAccoutSchema, validateUsernameQuery } from '../utils/validationSchema.js';
 import { checkRequestUser } from '../utils/middleware.js';
-import { getDeleteUserByPatch, getRegister, getUpdateUser, getUsers, getDeleteUser } from '../controller/users.js';
+import { getDeleteUserByPatch, getUpdateUser, getUsers, getDeleteUser } from '../controller/users.js';
 
 
 
@@ -13,8 +13,7 @@ router.get('/users', getUsers)
 router.get('/users', validateUsernameQuery, getUsers)
 
 
-//create 
-router.post('/register', createAccountSchema, getRegister)
+
 //update
 router.put('/updateUser/:id', checkRequestUser, updateAccoutSchema, getUpdateUser);
 //delete

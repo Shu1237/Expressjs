@@ -1,11 +1,14 @@
 
 import { Router } from "express";
-import { Home, LoginStatus, LoginUser, Logout } from "../controller/auth.js";
+import { getRegister, Home, LoginStatus, LoginUser, Logout } from "../controller/auth.js";
+import { createAccountSchema } from "../utils/validationSchema.js";
 
 const router = Router();
 
 
 router.get('/',Home);
+//create 
+router.post('/register', createAccountSchema,getRegister)
 router.post('/login',LoginUser );
 router.get('/login/status',LoginStatus );
 router.post('/logout',Logout);
