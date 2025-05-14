@@ -1,9 +1,6 @@
 
 import { Router } from 'express';
-import { matchedData, query, validationResult } from 'express-validator';
-import { hashPassword } from '../utils/helpers.js';
-import { User } from '../mongoose/model/users.js';
-import { createAccountSchema, updateAccoutSchema } from '../utils/validationSchema.js';
+import { createAccountSchema, updateAccoutSchema, validateUsernameQuery } from '../utils/validationSchema.js';
 import { checkRequestUser } from '../utils/middleware.js';
 import { getDeleteUserByPatch, getRegister, getUpdateUser, getUsers, getDeleteUser } from '../controller/users.js';
 
@@ -13,17 +10,7 @@ const router = Router();
 //get 
 router.get('/users', getUsers)
 //query
-router.get(
-  '/users',
-  query("username")
-    .optional()
-    .isString()
-    .notEmpty()
-    .withMessage("Username must not be empty")
-    .isLength({ min: 3, max: 10 })
-    .withMessage("Must be 3-10 characters"),
-  getUsers
-)
+router.get('/users', validateUsernameQuery, getUsers)
 
 
 //create 

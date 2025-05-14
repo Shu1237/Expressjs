@@ -1,5 +1,6 @@
 import { User } from "../mongoose/model/users.js";
 import { matchedData, validationResult } from 'express-validator';
+import { hashPassword } from "../utils/helpers.js";
 
 
 
@@ -8,7 +9,7 @@ export const getUsers = async (req, res) => {
   if (!result.isEmpty()) {
     return res.status(400).send({ error: result.array() });
   }
-  if(!req.cookies.token) return res.sendStatus(401)
+  if(!req.cookies?.token) return res.sendStatus(401)
  const username = req.query.username;
   try {
     let users;

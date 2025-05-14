@@ -1,9 +1,6 @@
 
 import { Router } from "express";
-
 import { Home, LoginStatus, LoginUser, Logout } from "../controller/auth.js";
-
-
 
 const router = Router();
 

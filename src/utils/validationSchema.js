@@ -1,6 +1,15 @@
 import { checkSchema } from 'express-validator';
 
+import { query } from 'express-validator';
 
+export const validateUsernameQuery = [
+  query('username')
+    .optional()
+    .isString()
+    .withMessage('Username must be a string')
+    .isLength({ min: 3, max: 10 })
+    .withMessage('Username must be 3 to 10 characters')
+];
 
 export const createTaskSchema = checkSchema({
   name: {
