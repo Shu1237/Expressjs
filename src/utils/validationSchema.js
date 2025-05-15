@@ -12,16 +12,17 @@ export const validateUsernameQuery = [
 ];
 
 export const createTaskSchema = checkSchema({
-  name: {
+  title: {
     in: ['body'],
     notEmpty: {
-      errorMessage: 'Task name cannot be empty',
+      errorMessage: 'Task title cannot be empty',
     },
     isLength: {
       options: { min: 3 },
-      errorMessage: 'Task name must be at least 3 characters long',
+      errorMessage: 'Task title must be at least 3 characters long',
     },
   },
+
   description: {
     in: ['body'],
     notEmpty: {
@@ -32,33 +33,65 @@ export const createTaskSchema = checkSchema({
       errorMessage: 'Description must be at least 5 characters long',
     },
   },
-  date: {
+
+  startDate: {
     in: ['body'],
     notEmpty: {
-      errorMessage: 'Date cannot be empty',
+      errorMessage: 'Start date cannot be empty',
     },
     isISO8601: {
-      errorMessage: 'Invalid date format, please use YYYY-MM-DD',
+      errorMessage: 'Invalid start date format, please use YYYY-MM-DD',
     },
     custom: {
       options: (value) => {
         const today = new Date();
-        const taskDate = new Date(value);
-        if (taskDate < today) {
-          throw new Error('Date must be in the future');
+        const startDate = new Date(value);
+        if (startDate < today) {
+          throw new Error('Start date must be in the future');
         }
         return true;
       },
-      errorMessage: 'Date must be in the future',
     },
   },
+
+  dueDate: {
+    in: ['body'],
+    notEmpty: {
+      errorMessage: 'Due date cannot be empty',
+    },
+    isISO8601: {
+      errorMessage: 'Invalid due date format, please use YYYY-MM-DD',
+    },
+    custom: {
+      options: (value, { req }) => {
+        const dueDate = new Date(value);
+        const startDate = new Date(req.body.startDate);
+        if (dueDate <= startDate) {
+          throw new Error('Due date must be after the start date');
+        }
+        return true;
+      },
+    },
+  },
+
   status: {
     in: ['body'],
     optional: true,
     isIn: {
-      options: [['todo', 'in_progress', 'done', "cancel"]],
+      options: [['todo', 'in_progress', 'done', 'cancel']],
       errorMessage: 'Status must be one of: todo, in_progress, done',
     },
+  },
+
+  assignedTo: {
+    in: ['body'],
+    notEmpty: {
+      errorMessage: 'assignedTo is required',
+    },
+    isMongoId: {
+      errorMessage: 'assignedTo must be a valid MongoDB ObjectId',
+    },
+    optional:true
   },
 });
 
@@ -99,16 +132,16 @@ export const createAccountSchema = checkSchema({
     isString: {
       errorMessage: 'Full name must be a string',
     },
-    
+
   },
   role: {
-      in: ['body'],
-      optional: true,
-      isIn: {
-        options: [['user', 'admin']],
-        errorMessage: 'Please only choose user or admin',
-      },
-    }
+    in: ['body'],
+    optional: true,
+    isIn: {
+      options: [['user', 'admin']],
+      errorMessage: 'Please only choose user or admin',
+    },
+  }
 });
 
 export const updateAccoutSchema = checkSchema({

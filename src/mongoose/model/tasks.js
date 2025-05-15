@@ -1,8 +1,11 @@
 
 import mongoose, { Schema } from "mongoose";
+
+
+
 const taskSchema = new Schema(
   {
-    name: {
+    title: {
       type: String,
       required: true,
     },
@@ -10,21 +13,31 @@ const taskSchema = new Schema(
       type: String,
       required: true,
     },
-    date: {
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    dueDate: {
       type: Date,
       required: true,
     },
     status: {
       type: String,
-      enum: ['todo', 'in_progress', 'done',"cancel"],
+      enum: ['todo', 'in_progress', 'done', 'cancel'],
       default: 'todo',
+    },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-    },
+    }
   },
   { timestamps: true }
 );
+
 export const Task = mongoose.model('Task', taskSchema);

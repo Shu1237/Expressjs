@@ -14,23 +14,40 @@ export const CreateTask = async (req, res) => {
     if (!result.isEmpty()) {
         return res.status(400).send({ error: result.array() });
     }
-
     const data = matchedData(req);
-    console.log('Validated data:', data);
-
     try {
-        const newTask = new Task({
-            ...data,
-            createdBy: req.user.id,
-        });
+        let createdTasks = [];
+        if (!data.assignedTo) { // self_create task
+            const newTask = new Task({
+                ...data,
+                assignedTo: req.user.id,
+                createdBy: req.user.id,
+            });
+            await newTask.save();
+            createdTasks.push(newTask);
+        } else {
+            // admin creates task for users
+            const assignedIds = Array.isArray(data.assignedTo)
+                ? data.assignedTo
+                : data.assignedTo
+                    ? [data.assignedTo]
+                    : [];
 
-        await newTask.save();
+            for (const userId of assignedIds) {
+                const task = new Task({
+                    ...data,
+                    assignedTo: userId,
+                    createdBy: req.user.id,
+                });
+                await task.save();
+                createdTasks.push(task);
+            }
+        }
 
         return res.status(201).send({
             msg: 'Create Successful',
-            task: newTask,
+            tasks: createdTasks,
         });
-
     } catch (error) {
         console.error('Error creating task:', error);
         return res.status(400).send({ message: 'Create Failed', error: error.message });
@@ -42,31 +59,32 @@ export const UpdateTask = async (req, res) => {
     if (!result.isEmpty()) {
         return res.status(400).send({ error: result.array() });
     }
-    const { task } = req; //full data 
-    const body = matchedData(req)
+    const { task } = req;
+    const data = matchedData(req)
     if (task.status === 'done') {
         return res.status(400).send({ msg: 'Cannot update a completed task' });
     }
-
-    const allowedFields = ['name', 'description', 'date', 'status'];
-    allowedFields.forEach(field => {
-        if (body[field] !== undefined) {
-            task[field] = body[field];
-        }
-    });
     try {
+
+        const allowedFields = ['title', 'description', 'startDate', 'dueDate'];
+        allowedFields.forEach(field => {
+            if (data[field] !== undefined) {
+                task[field] = data[field];
+            }
+        });
         const updatedTask = await task.save();
         return res.status(200).send({
             msg: 'Task updated successfully',
             task: updatedTask
         });
+
     } catch (error) {
         console.error('Error updating task:', error);
         return res.status(500).send({ msg: 'Internal server error' });
     }
 }
 
-export const DeleteTaskByPatch =  async (req, res) => {
+export const DeleteTaskByPatch = async (req, res) => {
     if (!req.user) return res.sendStatus(401);
     const task = req.task;
     if (task.status === 'cancel') {
@@ -83,13 +101,13 @@ export const DeleteTaskByPatch =  async (req, res) => {
     }
 }
 export const DeleteTask = async (req, res) => {
-  if (!req.user) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
 
-  try {
-    await req.task.deleteOne(); // hoặc: Task.findByIdAndDelete(req.params.id)
-    res.send({ msg: 'Task deleted successfully' });
-  } catch (err) {
-    console.error('Delete error:', err);
-    res.status(500).send({ msg: 'Error deleting task', error: err.message });
-  }
+    try {
+        await req.task.deleteOne(); // hoặc: Task.findByIdAndDelete(req.params.id)
+        res.send({ msg: 'Task deleted successfully' });
+    } catch (err) {
+        console.error('Delete error:', err);
+        res.status(500).send({ msg: 'Error deleting task', error: err.message });
+    }
 }
