@@ -59,14 +59,13 @@ export const getRegister = async (req, res) => {
             message: 'Username already exists'
         });
     }
-    // console.log(data)
     data.password = hashPassword(data.password)
     const newUser = User(data)
     try {
         const savedUser = await newUser.save();
         return res.status(201).send({
             message: 'Create Successful',
-            user: savedUser
+      
         });
     } catch (error) {
         console.log('Error creating user:', error);

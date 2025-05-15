@@ -3,8 +3,23 @@ import { validationResult, matchedData } from 'express-validator';
 import { Task } from '../mongoose/model/tasks.js';
 export const AllTask = async (req, res) => {
     try {
-        const taks = await Task.find();
-        res.status(200).send(taks)
+        const taks = await Task.find()
+            .populate('assignedTo', 'fullname')
+            .populate('createdBy', 'fullname');
+
+          const formattedTasks = taks.map(task => ({
+            _id: task._id,
+            title: task.title,
+            description: task.description,
+            startDate: task.startDate,
+            dueDate: task.dueDate,
+            status: task.status,
+            assignedTo: task.assignedTo?.fullname || null,
+            createdBy: task.createdBy?.fullname || null,    
+            createdAt: task.createdAt,
+            updatedAt: task.updatedAt,
+        }));
+        res.status(200).send(formattedTasks)
     } catch (error) {
         res.status(500).send(error);
     }
