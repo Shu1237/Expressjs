@@ -9,7 +9,7 @@ export const getUsers = async (req, res) => {
   if (!result.isEmpty()) {
     return res.status(400).send({ error: result.array() });
   }
-  if(!req.cookies?.token) return res.sendStatus(401)
+  if(!req.cookies?.access_token) return res.sendStatus(401)
  const username = req.query.username;
   try {
     let users;
@@ -50,8 +50,7 @@ export const getUpdateUser =async (req, res) => {
   try {
     const updatedUser = await user.save();
     return res.status(200).send({
-      msg: 'User updated successfully',
-      user: updatedUser,
+      msg: 'User updated successfully'
     });
   } catch (err) {
     console.error('Update error:', err);
@@ -65,7 +64,7 @@ export const getDeleteUserByPatch = async (req, res) => {
   user.status = 'inactive'
   try {
     const updateStatusUser = await user.save();
-    res.send({ msg: 'User deleted successfully', user: updateStatusUser });
+    res.send({ msg: 'User deleted successfully'});
   } catch (err) {
     console.error('Error deleting user:', err);
     res.status(500).send({ msg: 'Internal server error', error: err.message });
