@@ -5,21 +5,22 @@ import { hashPassword } from "../utils/helpers.js";
 
 
 export const getUsers = async (req, res) => {
-   const result = validationResult(req);
+  const result = validationResult(req);
   if (!result.isEmpty()) {
     return res.status(400).send({ error: result.array() });
   }
-  if(!req.cookies?.access_token) return res.sendStatus(401)
- const username = req.query.username;
+  if (!req.cookies?.access_token) return res.sendStatus(401)
+  const username = req.query.username;
+  if (req.token.role === 'user') return res.status(403).send({ msg: 'You need login role admin to see this information' })
   try {
     let users;
-    if (username) {
-      users = await User.find({
-        username: { $regex: username, $options: 'i' }
-      });
-    } else {
-      users = await User.find();
-    }
+    // if (username) {
+    //   users = await User.find({
+    //     username: { $regex: username, $options: 'i' }
+    //   });
+    // } else {
+    users = await User.find();
+    // }
 
     return res.status(200).json(users);
   } catch (error) {
@@ -27,16 +28,20 @@ export const getUsers = async (req, res) => {
   }
 };
 
-export const getUpdateUser =async (req, res) => {
+export const getUpdateUser = async (req, res) => {
   if (!req.user) return res.sendStatus(401);
-
+  if (req.user.role === 'user' && req.params.id !== req.token.id) {
+    return res.status(403).send({ msg: 'You are not allowed to update other users' });
+  }
   const result = validationResult(req);
   if (!result.isEmpty()) {
     return res.status(400).send({ error: result.array() });
   }
-
+  // console.log(req.params.id)
+  //  console.log(req.user.id)
   const body = matchedData(req);
-  const user = req.user;
+  const user = req.user; // middleware
+
 
   // Chỉ cho phép cập nhật những field này
   const allowedFields = ['fullname'];
@@ -48,7 +53,7 @@ export const getUpdateUser =async (req, res) => {
   });
 
   try {
-    const updatedUser = await user.save();
+    await user.save();
     return res.status(200).send({
       msg: 'User updated successfully'
     });
@@ -60,19 +65,25 @@ export const getUpdateUser =async (req, res) => {
 
 export const getDeleteUserByPatch = async (req, res) => {
   if (!req.user) return res.sendStatus(401);
+  if (req.user.role === 'user' && req.params.id !== req.token.id) {
+    return res.status(403).send({ msg: 'You are not allowed to delete other users' });
+  }
   const user = req.user;
   user.status = 'inactive'
   try {
-    const updateStatusUser = await user.save();
-    res.send({ msg: 'User deleted successfully'});
+    await user.save();
+    res.send({ msg: 'User deleted successfully' });
   } catch (err) {
     console.error('Error deleting user:', err);
     res.status(500).send({ msg: 'Internal server error', error: err.message });
   }
 }
 //hard delete
-export const getDeleteUser=async (req, res) => {
+export const getDeleteUser = async (req, res) => {
   if (!req.user) return res.sendStatus(401);
+  if (req.user.role === 'user' && req.params.id !== req.token.id) {
+    return res.status(403).send({ msg: 'You are not allowed to delete other users' });
+  }
   try {
     await req.user.deleteOne();
     res.send({ msg: 'User deleted successfully' });

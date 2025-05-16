@@ -20,8 +20,8 @@ export const Home = async (req, res) => {
         const listtask = await Task.find({ assignedTo: decoded.id })
             .populate('assignedTo', 'fullname')
             .populate('createdBy', 'fullname');
-
-        const formattedTasks = listtask.map(task => ({
+        const filterTask = listtask.filter((task) => task.status !== 'cancel')
+        const formattedTasks = filterTask.map(task => ({
             _id: task._id,
             title: task.title,
             description: task.description,
@@ -29,11 +29,11 @@ export const Home = async (req, res) => {
             dueDate: task.dueDate,
             status: task.status,
             assignedTo: task.assignedTo?.fullname || null,
-            createdBy: task.createdBy?.fullname || null,    
+            createdBy: task.createdBy?.fullname || null,
             createdAt: task.createdAt,
             updatedAt: task.updatedAt,
         }));
-      
+
 
 
         return res.status(200).send({
@@ -65,7 +65,7 @@ export const getRegister = async (req, res) => {
         const savedUser = await newUser.save();
         return res.status(201).send({
             message: 'Create Successful',
-      
+
         });
     } catch (error) {
         console.log('Error creating user:', error);

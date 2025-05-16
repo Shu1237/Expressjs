@@ -2,12 +2,12 @@
 import { validationResult, matchedData } from 'express-validator';
 import { Task } from '../mongoose/model/tasks.js';
 export const AllTask = async (req, res) => {
+    if (req.token.role === 'user') return res.status(403).send({ msg: 'You need login role admin to see this information' })
     try {
         const taks = await Task.find()
             .populate('assignedTo', 'fullname')
             .populate('createdBy', 'fullname');
-
-          const formattedTasks = taks.map(task => ({
+        const formattedTasks = taks.map(task => ({
             _id: task._id,
             title: task.title,
             description: task.description,
@@ -15,7 +15,7 @@ export const AllTask = async (req, res) => {
             dueDate: task.dueDate,
             status: task.status,
             assignedTo: task.assignedTo?.fullname || null,
-            createdBy: task.createdBy?.fullname || null,    
+            createdBy: task.createdBy?.fullname || null,
             createdAt: task.createdAt,
             updatedAt: task.updatedAt,
         }));
@@ -31,8 +31,12 @@ export const CreateTask = async (req, res) => {
     }
     const data = matchedData(req);
     try {
+        const checkRole = req.token.role
         let createdTasks = [];
-        if (!data.assignedTo) { // self_create task
+        if (checkRole.toLowerCase() === 'user') { // self_create task
+            if (data.assignedTo && data.assignedTo !== req.user.id) {
+                return res.status(403).json({ message: 'Users can only assign tasks to themselves' });
+            }
             const newTask = new Task({
                 ...data,
                 assignedTo: req.user.id,
@@ -70,23 +74,32 @@ export const CreateTask = async (req, res) => {
 }
 export const UpdateTask = async (req, res) => {
     if (!req.user) return res.sendStatus(401);
+
     const result = validationResult(req);
     if (!result.isEmpty()) {
         return res.status(400).send({ error: result.array() });
     }
-    const { task } = req;
-    const data = matchedData(req)
+
+    const { task,user } = req;
+    const data = matchedData(req);
+
     if (task.status === 'done') {
         return res.status(400).send({ msg: 'Cannot update a completed task' });
     }
-    try {
 
+
+    if (user.role === 'user' && user.id !== task.createdBy.toString()) {
+        return res.status(403).send({ msg: 'You are not allowed to update this task,Please Login by Admin to ' });
+    }
+
+    try {
         const allowedFields = ['title', 'description', 'startDate', 'dueDate'];
         allowedFields.forEach(field => {
             if (data[field] !== undefined) {
                 task[field] = data[field];
             }
         });
+
         const updatedTask = await task.save();
         return res.status(200).send({
             msg: 'Task updated successfully',
@@ -97,24 +110,31 @@ export const UpdateTask = async (req, res) => {
         console.error('Error updating task:', error);
         return res.status(500).send({ msg: 'Internal server error' });
     }
-}
+};
+
 
 export const DeleteTaskByPatch = async (req, res) => {
-    if (!req.user) return res.sendStatus(401);
-    const task = req.task;
-    if (task.status === 'cancel') {
-        return res.status(400).send({ msg: 'Task is already canceled' });
-    }
-    task.status = 'cancel';
+  if (!req.user) return res.sendStatus(401);
 
-    try {
-        const updatedTask = await task.save();
-        res.send({ msg: 'Task canceled successfully', task: updatedTask });
-    } catch (err) {
-        console.error('Error canceling task:', err);
-        res.status(500).send({ msg: 'Internal server error', error: err.message });
-    }
-}
+  const {task,user} = req.task;
+
+  if (task.status === 'cancel') {
+    return res.status(400).send({ msg: 'Task is already canceled' });
+  }
+
+  if (user.role === 'user' && user.id !== task.createdBy.toString()) {
+    return res.status(403).send({ msg: 'You are not allowed to cancel this task' });
+  }
+
+  try {
+    task.status = 'cancel'; 
+    const updatedTask = await task.save();
+    res.send({ msg: 'Task canceled successfully', task: updatedTask });
+  } catch (err) {
+    console.error('Error canceling task:', err);
+    res.status(500).send({ msg: 'Internal server error', error: err.message });
+  }
+};
 export const DeleteTask = async (req, res) => {
     if (!req.user) return res.sendStatus(401);
 
