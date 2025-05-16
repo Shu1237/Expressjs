@@ -56,7 +56,7 @@ export const CreateTask = async (req, res) => {
                 const task = new Task({
                     ...data,
                     assignedTo: userId,
-                    createdBy: req.user.id,
+                    createdBy: req.token.id,
                 });
                 await task.save();
                 createdTasks.push(task);
