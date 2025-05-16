@@ -110,7 +110,7 @@ export const UpdateTask = async (req, res) => {
 
 
 export const DeleteTaskByPatch = async (req, res) => {
-       const { task,token } = req;
+    const { task, token } = req;
     if (!token) return res.sendStatus(401);
     if (task.status === 'cancel') {
         return res.status(400).send({ msg: 'Task is already canceled' });
@@ -123,17 +123,21 @@ export const DeleteTaskByPatch = async (req, res) => {
     try {
         task.status = 'cancel';
         await task.save();
-        res.send({ msg: 'Task canceled successfully'});
+        res.send({ msg: 'Task canceled successfully' });
     } catch (err) {
         console.error('Error canceling task:', err);
         res.status(500).send({ msg: 'Internal server error', error: err.message });
     }
 };
 export const DeleteTask = async (req, res) => {
-    if (!req.user) return res.sendStatus(401);
+    const { task, token } = req;
+    if (!token) return res.sendStatus(401);
+    if (token.role === 'user' && token.id !== task.createdBy.toString()) {
+        return res.status(403).send({ msg: 'You are not allowed to cancel this task' });
+    }
 
     try {
-        await req.task.deleteOne(); // hoặc: Task.findByIdAndDelete(req.params.id)
+        await task.deleteOne();
         res.send({ msg: 'Task deleted successfully' });
     } catch (err) {
         console.error('Delete error:', err);
