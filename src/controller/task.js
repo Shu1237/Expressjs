@@ -39,8 +39,8 @@ export const CreateTask = async (req, res) => {
             }
             const newTask = new Task({
                 ...data,
-                assignedTo: req.user.id,
-                createdBy: req.user.id,
+                assignedTo: req.token.id,
+                createdBy: req.token.id,
             });
             await newTask.save();
             createdTasks.push(newTask);
