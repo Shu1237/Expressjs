@@ -32,7 +32,6 @@ export const CreateTask = async (req, res) => {
     const data = matchedData(req);
     try {
         const checkRole = req.token.role
-        let createdTasks = [];
         if (checkRole.toLowerCase() === 'user') { // self_create task
             if (data.assignedTo) {
                 return res.status(403).json({ message: 'Users can only assign tasks to themselves' });
@@ -43,7 +42,6 @@ export const CreateTask = async (req, res) => {
                 createdBy: req.token.id,
             });
             await newTask.save();
-            createdTasks.push(newTask);
         } else {
             // admin creates task for users
             const assignedIds = Array.isArray(data.assignedTo)
@@ -59,13 +57,11 @@ export const CreateTask = async (req, res) => {
                     createdBy: req.token.id,
                 });
                 await task.save();
-                createdTasks.push(task);
             }
         }
 
         return res.status(201).send({
             msg: 'Create Successful',
-            tasks: createdTasks,
         });
     } catch (error) {
         console.error('Error creating task:', error);
@@ -73,14 +69,14 @@ export const CreateTask = async (req, res) => {
     }
 }
 export const UpdateTask = async (req, res) => {
-    if (!req.user) return res.sendStatus(401);
+    if (!req.task) return res.sendStatus(401);
 
     const result = validationResult(req);
     if (!result.isEmpty()) {
         return res.status(400).send({ error: result.array() });
     }
 
-    const { task, user } = req;
+    const { task, token } = req;
     const data = matchedData(req);
 
     if (task.status === 'done') {
@@ -88,7 +84,7 @@ export const UpdateTask = async (req, res) => {
     }
 
 
-    if (user.role === 'user' && user.id !== task.createdBy.toString()) {
+    if (token.role === 'user' && token.id !== task.createdBy.toString()) {
         return res.status(403).send({ msg: 'You are not allowed to update this task,Please Login by Admin to ' });
     }
 
@@ -114,22 +110,20 @@ export const UpdateTask = async (req, res) => {
 
 
 export const DeleteTaskByPatch = async (req, res) => {
-    if (!req.user) return res.sendStatus(401);
-
-    const { task, user } = req.task;
-
+       const { task,token } = req;
+    if (!token) return res.sendStatus(401);
     if (task.status === 'cancel') {
         return res.status(400).send({ msg: 'Task is already canceled' });
     }
 
-    if (user.role === 'user' && user.id !== task.createdBy.toString()) {
+    if (token.role === 'user' && token.id !== task.createdBy.toString()) {
         return res.status(403).send({ msg: 'You are not allowed to cancel this task' });
     }
 
     try {
         task.status = 'cancel';
-        const updatedTask = await task.save();
-        res.send({ msg: 'Task canceled successfully', task: updatedTask });
+        await task.save();
+        res.send({ msg: 'Task canceled successfully'});
     } catch (err) {
         console.error('Error canceling task:', err);
         res.status(500).send({ msg: 'Internal server error', error: err.message });
