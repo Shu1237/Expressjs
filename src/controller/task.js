@@ -34,7 +34,7 @@ export const CreateTask = async (req, res) => {
         const checkRole = req.token.role
         let createdTasks = [];
         if (checkRole.toLowerCase() === 'user') { // self_create task
-            if (data.assignedTo && data.assignedTo !== req.user.id) {
+            if (data.assignedTo) {
                 return res.status(403).json({ message: 'Users can only assign tasks to themselves' });
             }
             const newTask = new Task({
@@ -80,7 +80,7 @@ export const UpdateTask = async (req, res) => {
         return res.status(400).send({ error: result.array() });
     }
 
-    const { task,user } = req;
+    const { task, user } = req;
     const data = matchedData(req);
 
     if (task.status === 'done') {
@@ -114,26 +114,26 @@ export const UpdateTask = async (req, res) => {
 
 
 export const DeleteTaskByPatch = async (req, res) => {
-  if (!req.user) return res.sendStatus(401);
+    if (!req.user) return res.sendStatus(401);
 
-  const {task,user} = req.task;
+    const { task, user } = req.task;
 
-  if (task.status === 'cancel') {
-    return res.status(400).send({ msg: 'Task is already canceled' });
-  }
+    if (task.status === 'cancel') {
+        return res.status(400).send({ msg: 'Task is already canceled' });
+    }
 
-  if (user.role === 'user' && user.id !== task.createdBy.toString()) {
-    return res.status(403).send({ msg: 'You are not allowed to cancel this task' });
-  }
+    if (user.role === 'user' && user.id !== task.createdBy.toString()) {
+        return res.status(403).send({ msg: 'You are not allowed to cancel this task' });
+    }
 
-  try {
-    task.status = 'cancel'; 
-    const updatedTask = await task.save();
-    res.send({ msg: 'Task canceled successfully', task: updatedTask });
-  } catch (err) {
-    console.error('Error canceling task:', err);
-    res.status(500).send({ msg: 'Internal server error', error: err.message });
-  }
+    try {
+        task.status = 'cancel';
+        const updatedTask = await task.save();
+        res.send({ msg: 'Task canceled successfully', task: updatedTask });
+    } catch (err) {
+        console.error('Error canceling task:', err);
+        res.status(500).send({ msg: 'Internal server error', error: err.message });
+    }
 };
 export const DeleteTask = async (req, res) => {
     if (!req.user) return res.sendStatus(401);
