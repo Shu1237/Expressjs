@@ -1,26 +1,21 @@
-
-import {  Router } from 'express';
+import { Router } from 'express';
 import { createTaskSchema } from '../utils/validationSchema.js';
 import { checkRequestTask, verifyJWT } from '../utils/middleware.js';
-import { AllTask, CreateTask, DeleteTaskByPatch, UpdateTask,DeleteTask } from '../controller/task.js';
-
+import {
+  getAllTasks,
+  createTask,
+  updateTask,
+  softDeleteTask,
+  hardDeleteTask
+} from '../controller/task.js';
 
 const router = Router();
 
 
-router.get('/tasks', verifyJWT, AllTask);
-router.post('/createTask',verifyJWT, createTaskSchema,CreateTask );
-router.put('/updateTask/:id',verifyJWT, checkRequestTask, createTaskSchema, UpdateTask);
-//router patch delete
-router.patch('/hidedeleteTask/:id',verifyJWT, checkRequestTask,DeleteTaskByPatch);
-router.delete('/harddeleteTask/:id', checkRequestTask,DeleteTask);
+router.get('/tasks', verifyJWT, getAllTasks);
+router.post('/tasks', verifyJWT, createTaskSchema, createTask);
+router.put('/tasks/:id', verifyJWT, checkRequestTask, createTaskSchema, updateTask);
+router.patch('/tasks/:id/soft-delete', verifyJWT, checkRequestTask, softDeleteTask);
+router.delete('/tasks/:id', verifyJWT, checkRequestTask, hardDeleteTask);
 
-
-
-
-
-
-
-export default router
-
-
+export default router;

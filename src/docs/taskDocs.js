@@ -20,7 +20,7 @@
 
 /**
  * @swagger
- * /createTask:
+ * /tasks:
  *   post:
  *     tags: [Tasks]
  *     summary: Tạo task (người dùng hoặc admin)
@@ -64,7 +64,7 @@
 
 /**
  * @swagger
- * /updateTask/{id}:
+ * /tasks/{id}:
  *   put:
  *     tags: [Tasks]
  *     summary: Cập nhật task
@@ -73,12 +73,14 @@
  *     parameters:
  *       - name: id
  *         in: path
- *         schema: { type: string }
  *         required: true
+ *         schema:
+ *           type: string
  *     requestBody:
  *       content:
  *         application/json:
  *           schema:
+ *             type: object
  *             properties:
  *               title:
  *                 type: string
@@ -95,39 +97,39 @@
  *         description: Cập nhật thành công
  */
 
-
-
 /**
  * @swagger
- * /hidedeleteTask/{id}:
+ * /tasks/{id}/soft-delete:
  *   patch:
  *     tags: [Tasks]
- *     summary: Xóa cứng task
+ *     summary: Xóa mềm task (ẩn task)
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
- *         schema: { type: string }
  *         required: true
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Task đã bị xóa hoàn toàn
+ *         description: Task đã bị ẩn (xóa mềm)
  */
 
 /**
  * @swagger
- * /harddeleteTask/{id}:
+ * /tasks/{id}:
  *   delete:
  *     tags: [Tasks]
- *     summary: Xóa cứng task
+ *     summary: Xóa cứng task (xóa khỏi DB)
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
- *         schema: { type: string }
  *         required: true
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Task đã bị xóa hoàn toàn
