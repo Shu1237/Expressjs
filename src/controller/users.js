@@ -21,7 +21,7 @@ export const getUsers = async (req, res) => {
 };
 
 export const getUpdateUser = async (req, res) => {
-  if (!req.user) return res.sendStatus(401);
+if (!req.token) return res.sendStatus(401);
   if (req.token.role === 'user' && req.params.id !== req.token.id) {
     return res.status(403).send({ msg: 'You are not allowed to update other users' });
   }
@@ -56,7 +56,7 @@ export const getUpdateUser = async (req, res) => {
 }
 
 export const getDeleteUserByPatch = async (req, res) => {
-  if (!req.user) return res.sendStatus(401);
+  if (!req.token) return res.sendStatus(401);
   if (req.token.role === 'user' && req.params.id !== req.token.id) {
     return res.status(403).send({ msg: 'You are not allowed to delete other users' });
   }
@@ -72,15 +72,16 @@ export const getDeleteUserByPatch = async (req, res) => {
 }
 //hard delete
 export const getDeleteUser = async (req, res) => {
-  if (!req.user) return res.sendStatus(401);
+  if (!req.token) return res.sendStatus(401);
   if (req.token.role === 'user' && req.params.id !== req.token.id) {
-    return res.status(403).send({ msg: 'You are not allowed to delete other users' });
+    return res.status(403).json({ msg: 'You are not allowed to delete other users' });
   }
+
   try {
     await req.user.deleteOne();
-    res.send({ msg: 'User deleted successfully' });
+    return res.json({ msg: 'User permanently deleted' });
   } catch (error) {
-    console.error('Delete error:', err);
-    res.status(500).send({ msg: 'Error deleting user', error: err.message });
+    console.error('Delete error:', error);
+    return res.status(500).json({ msg: 'Error deleting user', error: error.message });
   }
-}
+};
