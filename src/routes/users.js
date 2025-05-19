@@ -1,21 +1,31 @@
-
 import { Router } from 'express';
-import { updateAccoutSchema, validateUsernameQuery } from '../utils/validationSchema.js';
-import { checkRequestUser, verifyJWT } from '../utils/middleware.js';
-import { getDeleteUserByPatch, getUpdateUser, getUsers, getDeleteUser } from '../controller/users.js';
-
-
+import {
+  updateAccoutSchema,
+  validateUsernameQuery,
+} from '../utils/validationSchema.js';
+import {
+  checkRequestUser,
+  verifyJWT,
+} from '../utils/middleware.js';
+import {
+  getDeleteUserByPatch,
+  getUpdateUser,
+  getUsers,
+  getDeleteUser,
+} from '../controller/users.js';
 
 const router = Router();
-//get 
-router.get('/users',verifyJWT, getUsers)
-//query
-// router.get('/users',verifyJWT, validateUsernameQuery,getUsers)
 
-//update
-router.put('/updateUser/:id', verifyJWT,checkRequestUser, updateAccoutSchema, getUpdateUser);
-//delete
-router.patch('/deleteUser/:id',verifyJWT, checkRequestUser, getDeleteUserByPatch)
 
-// router.delete('/deleteUser/:id',verifyJWT, checkRequestUser,getDeleteUser )
+router.get('/users', verifyJWT, getUsers);
+
+
+router.put('/users/:id', verifyJWT, checkRequestUser, updateAccoutSchema, getUpdateUser);
+
+
+router.patch('/users/:id/soft-delete', verifyJWT, checkRequestUser, getDeleteUserByPatch);
+
+
+router.delete('/users/:id', verifyJWT, checkRequestUser, getDeleteUser);
+
 export default router;

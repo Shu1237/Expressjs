@@ -6,22 +6,14 @@ import { hashPassword } from "../utils/helpers.js";
 
 export const getUsers = async (req, res) => {
   const result = validationResult(req);
-  if (!result.isEmpty()) {
-    return res.status(400).send({ error: result.array() });
-  }
-  if (!req.cookies?.access_token) return res.sendStatus(401)
-  const username = req.query.username;
-  if (req.token.role === 'user') return res.status(403).send({ msg: 'You need login role admin to see this information' })
-  try {
-    let users;
-    // if (username) {
-    //   users = await User.find({
-    //     username: { $regex: username, $options: 'i' }
-    //   });
-    // } else {
-    users = await User.find();
-    // }
+  if (!result.isEmpty()) return res.status(400).json({ error: result.array() });
 
+  if (!req.token || req.token.role !== 'admin') {
+    return res.status(403).json({ msg: 'Only admins can view all users' });
+  }
+
+  try {
+    const users = await User.find();
     return res.status(200).json(users);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -30,7 +22,7 @@ export const getUsers = async (req, res) => {
 
 export const getUpdateUser = async (req, res) => {
   if (!req.user) return res.sendStatus(401);
-  if (req.user.role === 'user' && req.params.id !== req.token.id) {
+  if (req.token.role === 'user' && req.params.id !== req.token.id) {
     return res.status(403).send({ msg: 'You are not allowed to update other users' });
   }
   const result = validationResult(req);
@@ -65,7 +57,7 @@ export const getUpdateUser = async (req, res) => {
 
 export const getDeleteUserByPatch = async (req, res) => {
   if (!req.user) return res.sendStatus(401);
-  if (req.user.role === 'user' && req.params.id !== req.token.id) {
+  if (req.token.role === 'user' && req.params.id !== req.token.id) {
     return res.status(403).send({ msg: 'You are not allowed to delete other users' });
   }
   const user = req.user;
@@ -81,7 +73,7 @@ export const getDeleteUserByPatch = async (req, res) => {
 //hard delete
 export const getDeleteUser = async (req, res) => {
   if (!req.user) return res.sendStatus(401);
-  if (req.user.role === 'user' && req.params.id !== req.token.id) {
+  if (req.token.role === 'user' && req.params.id !== req.token.id) {
     return res.status(403).send({ msg: 'You are not allowed to delete other users' });
   }
   try {

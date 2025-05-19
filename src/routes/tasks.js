@@ -12,8 +12,8 @@ router.get('/tasks', verifyJWT, AllTask);
 router.post('/createTask',verifyJWT, createTaskSchema,CreateTask );
 router.put('/updateTask/:id',verifyJWT, checkRequestTask, createTaskSchema, UpdateTask);
 //router patch delete
-router.patch('/deleteTask/:id',verifyJWT, checkRequestTask,DeleteTaskByPatch);
-// router.delete('/deleteTask/:id', checkRequestTask,DeleteTask);
+router.patch('/hidedeleteTask/:id',verifyJWT, checkRequestTask,DeleteTaskByPatch);
+router.delete('/harddeleteTask/:id', checkRequestTask,DeleteTask);
 
 
 
