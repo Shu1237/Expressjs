@@ -48,7 +48,7 @@ export const createTask = async (req, res) => {
         return res.status(400).send({ error: result.array() });
     }
     const data = matchedData(req);
-    console.log('data', data);
+    // console.log('data', data);
     try {
         const checkRole = req.token.role
         console.log('checkRole', checkRole);
