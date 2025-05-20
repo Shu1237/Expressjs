@@ -9,11 +9,17 @@ import {
   hardDeleteTask,
   updateTaskStatus
 } from '../controller/task.js';
+import { query } from 'express-validator';
 
 const router = Router();
 
 
-router.get('/tasks', verifyJWT, getAllTasks);
+router.get('/tasks', verifyJWT,query("title") 
+  .optional()
+  .isString()
+  .notEmpty().withMessage("Title must not be empty")
+  .isLength({ min: 3, max: 100 })
+  .withMessage("Must be 3-100 characters"), getAllTasks);
 router.post('/tasks', verifyJWT, createTaskSchema, createTask);
 router.put('/tasks/:id', verifyJWT, checkRequestTask, createTaskSchema, updateTask);
 router.patch('/tasks/:id/soft-delete', verifyJWT, checkRequestTask, softDeleteTask);

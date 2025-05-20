@@ -6,14 +6,23 @@ import { hashPassword } from "../utils/helpers.js";
 
 export const getUsers = async (req, res) => {
   const result = validationResult(req);
-  if (!result.isEmpty()) return res.status(400).json({ error: result.array() });
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
 
   if (!req.token || req.token.role !== 'admin') {
     return res.status(403).json({ msg: 'Only admins can view all users' });
   }
 
+  const { fullname } = req.query;
+  const query = {};
+
+  if (fullname) {
+    query.fullname = { $regex: new RegExp(fullname, 'i') }; // tìm không phân biệt hoa thường
+  }
+
   try {
-    const users = await User.find();
+    const users = await User.find(query).select('-password'); // bỏ password nếu có
     return res.status(200).json(users);
   } catch (error) {
     return res.status(500).json({ error: error.message });

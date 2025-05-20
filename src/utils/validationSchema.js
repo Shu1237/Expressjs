@@ -78,8 +78,8 @@ export const createTaskSchema = checkSchema({
     in: ['body'],
     optional: true,
     isIn: {
-      options: [['todo', 'done', 'cancel']],
-      errorMessage: 'Status must be one of: todo, done',
+      options: [['todo','in_progress', 'done', 'cancel']],
+      errorMessage: 'Status must be one of: todo, in_progress, done',
     },
   },
 

@@ -1,14 +1,27 @@
 
 import { validationResult, matchedData } from 'express-validator';
 import { Task } from '../mongoose/model/tasks.js';
-import exp from 'constants';
+
+
 export const getAllTasks = async (req, res) => {
-    if (req.token.role === 'user') return res.status(403).send({ msg: 'You need login role admin to see this information' })
+    if (req.token.role === 'user') {
+        return res.status(403).send({ msg: 'You need admin role to see this information' });
+    }
+
+    let { title } = req.query;
+    const query = {};
+
+    if (title) {
+        title = title.toLowerCase();
+        query.title = { $regex: new RegExp(title, 'i') }; 
+    }
+
     try {
-        const taks = await Task.find()
+        const tasks = await Task.find(query)
             .populate('assignedTo', 'fullname')
             .populate('createdBy', 'fullname');
-        const formattedTasks = taks.map(task => ({
+
+        const formattedTasks = tasks.map(task => ({
             _id: task._id,
             title: task.title,
             description: task.description,
@@ -20,11 +33,15 @@ export const getAllTasks = async (req, res) => {
             createdAt: task.createdAt,
             updatedAt: task.updatedAt,
         }));
-        res.status(200).send(formattedTasks)
+
+        res.status(200).send(formattedTasks);
     } catch (error) {
-        res.status(500).send(error);
+        console.error(error);
+        res.status(500).send({ msg: 'Internal server error', error });
     }
-}
+};
+
+
 export const createTask = async (req, res) => {
     const result = validationResult(req);
     if (!result.isEmpty()) {
@@ -121,12 +138,20 @@ export const updateTaskStatus = async (req, res) => {
     }
 
     try {
-       if(task.status ==='todo'){
+       switch (task.status) {
+        case 'todo':
+        task.status = 'in_progress';
+        break;
+        case 'in_progress':
         task.status = 'done';
-       }
-       else if (task.status === 'done') {
+        break;
+        case 'cancel':
+        return res.status(400).send({ msg: 'Task is already canceled' });
+        case 'done':
         return res.status(400).send({ msg: 'Task is already completed' });
-       }
+        default:
+        return res.status(400).send({ msg: 'Invalid task status' });
+    }
         await task.save();
         res.send({ msg: ' Updated status successfully' });
     } catch (err) {
