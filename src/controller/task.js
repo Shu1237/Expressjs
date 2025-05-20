@@ -1,7 +1,7 @@
 
 import { validationResult, matchedData } from 'express-validator';
 import { Task } from '../mongoose/model/tasks.js';
-export const AllTask = async (req, res) => {
+export const getAllTasks = async (req, res) => {
     if (req.token.role === 'user') return res.status(403).send({ msg: 'You need login role admin to see this information' })
     try {
         const taks = await Task.find()
@@ -24,7 +24,7 @@ export const AllTask = async (req, res) => {
         res.status(500).send(error);
     }
 }
-export const CreateTask = async (req, res) => {
+export const createTask = async (req, res) => {
     const result = validationResult(req);
     if (!result.isEmpty()) {
         return res.status(400).send({ error: result.array() });
@@ -68,7 +68,7 @@ export const CreateTask = async (req, res) => {
         return res.status(400).send({ message: 'Create Failed', error: error.message });
     }
 }
-export const UpdateTask = async (req, res) => {
+export const updateTask = async (req, res) => {
     if (!req.task) return res.sendStatus(401);
 
     const result = validationResult(req);
@@ -109,7 +109,7 @@ export const UpdateTask = async (req, res) => {
 };
 
 
-export const DeleteTaskByPatch = async (req, res) => {
+export const softDeleteTask = async (req, res) => {
     const { task, token } = req;
     if (!token) return res.sendStatus(401);
     if (task.status === 'cancel') {
@@ -129,7 +129,7 @@ export const DeleteTaskByPatch = async (req, res) => {
         res.status(500).send({ msg: 'Internal server error', error: err.message });
     }
 };
-export const DeleteTask = async (req, res) => {
+export const hardDeleteTask = async (req, res) => {
     const { task, token } = req;
     if (!token) return res.sendStatus(401);
     if (token.role === 'user' && token.id !== task.createdBy.toString()) {
