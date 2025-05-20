@@ -99,6 +99,44 @@
  *         description: Cập nhật thành công
  */
 
+
+/**
+ * @swagger
+ * /tasks/{id}/update-status:
+ *   patch:
+ *     tags: [Tasks]
+ *     summary: Cập nhật trạng thái của task (chỉ người tạo hoặc admin)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID của task cần cập nhật
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Cập nhật trạng thái thành công
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: Updated status successfully
+ *       400:
+ *         description: Task đã hoàn thành hoặc không hợp lệ
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: Task is already completed
+ *       401:
+ *         description: Không xác thực
+ *       403:
+ *         description: Không có quyền cập nhật task này
+ *       500:
+ *         description: Lỗi máy chủ nội bộ
+ */
+
+
 /**
  * @swagger
  * /tasks/{id}/soft-delete:

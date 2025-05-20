@@ -6,7 +6,8 @@ import {
   createTask,
   updateTask,
   softDeleteTask,
-  hardDeleteTask
+  hardDeleteTask,
+  updateTaskStatus
 } from '../controller/task.js';
 
 const router = Router();
@@ -16,6 +17,8 @@ router.get('/tasks', verifyJWT, getAllTasks);
 router.post('/tasks', verifyJWT, createTaskSchema, createTask);
 router.put('/tasks/:id', verifyJWT, checkRequestTask, createTaskSchema, updateTask);
 router.patch('/tasks/:id/soft-delete', verifyJWT, checkRequestTask, softDeleteTask);
+router.patch('/tasks/:id/update-status', verifyJWT, checkRequestTask, updateTaskStatus);
 router.delete('/tasks/:id', verifyJWT, checkRequestTask, hardDeleteTask);
+
 
 export default router;

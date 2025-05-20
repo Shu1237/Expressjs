@@ -64,14 +64,16 @@ export const getRegister = async (req, res) => {
     data.password = hashPassword(data.password);
     if (!data.role) {
         data.role = 'user';
+    }else {
+         data.role = 'admin';
     }
 
    
-    if (data.role.toLowerCase() === 'admin') {
-        if (!req.token || req.token.role?.toLowerCase() !== 'admin') {
-            return res.status(403).json({ message: 'Chỉ admin mới có quyền tạo tài khoản admin' });
-        }
-    }
+    // if (data.role.toLowerCase() === 'admin') {
+    //     if (!req.token || req.token.role?.toLowerCase() !== 'admin') {
+    //         return res.status(403).json({ message: 'Chỉ admin mới có quyền tạo tài khoản admin' });
+    //     }
+    // }
 
     const newUser = new User(data);
 

@@ -1,6 +1,7 @@
 
 import { validationResult, matchedData } from 'express-validator';
 import { Task } from '../mongoose/model/tasks.js';
+import exp from 'constants';
 export const getAllTasks = async (req, res) => {
     if (req.token.role === 'user') return res.status(403).send({ msg: 'You need login role admin to see this information' })
     try {
@@ -108,7 +109,31 @@ export const updateTask = async (req, res) => {
     }
 };
 
+export const updateTaskStatus = async (req, res) => {
+    const { task, token } = req;
+    if (!token) return res.sendStatus(401);
+    if (task.status === 'done') {
+        return res.status(400).send({ msg: 'Task is already completed' });
+    }
 
+    if (token.role === 'user' && token.id !== task.createdBy.toString()) {
+        return res.status(403).send({ msg: 'You are not allowed to update this task' });
+    }
+
+    try {
+       if(task.status ==='todo'){
+        task.status = 'done';
+       }
+       else if (task.status === 'done') {
+        return res.status(400).send({ msg: 'Task is already completed' });
+       }
+        await task.save();
+        res.send({ msg: ' Updated status successfully' });
+    } catch (err) {
+        console.error('Error updating task:', err);
+        res.status(500).send({ msg: 'Internal server error', error: err.message });
+    }
+}
 export const softDeleteTask = async (req, res) => {
     const { task, token } = req;
     if (!token) return res.sendStatus(401);
