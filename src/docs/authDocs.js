@@ -7,6 +7,28 @@
 
 /**
  * @swagger
+ * /:
+ *   get:
+ *     tags: [Home]
+ *     summary: Trang chính và xác minh đăng nhập
+ *     description: Hiển thị trang chính của API và kiểm tra xem người dùng đã đăng nhập hay chưa.
+ *     responses:
+ *       200:
+ *         description: Trạng thái đăng nhập của người dùng
+ *         content:
+ *           application/json:
+ *             examples:
+ *               Đã đăng nhập:
+ *                 value:
+ *                   message: Đã đăng nhập
+ *               Chưa đăng nhập:
+ *                 value:
+ *                   message: Chưa đăng nhập
+ */
+
+
+/**
+ * @swagger
  * /login:
  *   post:
  *     tags: [Auth]
