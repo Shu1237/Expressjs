@@ -27,36 +27,38 @@
  *     security:
  *       - bearerAuth: []
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             oneOf:
- *               - type: object
- *                 properties:
- *                   title:
- *                     type: string
- *                   description:
- *                     type: string
- *                   startDate:
- *                     type: string
- *                     format: date-time
- *                   dueDate:
- *                     type: string
- *                     format: date-time
- *               - type: object
- *                 properties:
- *                   title:
- *                     type: string
- *                   description:
- *                     type: string
- *                   startDate:
- *                     type: string
- *                   dueDate:
- *                     type: string
- *                   assignedTo:
- *                     type: array
- *                     items:
- *                       type: string
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Báo cáo tuần
+ *               description:
+ *                 type: string
+ *                 example: Tổng hợp tiến độ các dự án
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *                 example: 2025-05-20T08:00:00Z
+ *               dueDate:
+ *                 type: string
+ *                 format: date-time
+ *                 example: 2025-05-25T17:00:00Z
+ *               assignedTo:
+ *                 type: array
+ *                 description: |
+ *                   (Tùy chọn) **Chỉ admin** có thể nhập `assignedTo`.
+ *                   Với người dùng thường, backend sẽ tự gán ID của chính họ.
+ *                 items:
+ *                   type: string
+ *                 example: ["user1", "user2"]
+ *             required:
+ *               - title
+ *               - startDate
+ *               - dueDate
  *     responses:
  *       201:
  *         description: Task đã được tạo

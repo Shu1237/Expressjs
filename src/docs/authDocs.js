@@ -45,6 +45,8 @@
  *                 type: string
  *               password:
  *                 type: string
+ *               role:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Tạo tài khoản thành công

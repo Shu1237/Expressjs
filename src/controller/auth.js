@@ -47,31 +47,45 @@ export const Home = async (req, res) => {
     }
 };
 export const getRegister = async (req, res) => {
-    const result = validationResult(req)
+    const result = validationResult(req);
     if (!result.isEmpty()) {
-        return res.status(400).send({ error: result.array() })
+        return res.status(400).send({ error: result.array() });
     }
 
     const data = matchedData(req);
+
     const existingUser = await User.findOne({ username: data.username });
     if (existingUser) {
         return res.status(409).send({
             message: 'Username already exists'
         });
     }
-    data.password = hashPassword(data.password)
-    const newUser = User(data)
-    try {
-        const savedUser = await newUser.save();
-        return res.status(201).send({
-            message: 'Create Successful',
 
+    data.password = hashPassword(data.password);
+    if (!data.role) {
+        data.role = 'user';
+    }
+
+   
+    if (data.role.toLowerCase() === 'admin') {
+        if (!req.token || req.token.role?.toLowerCase() !== 'admin') {
+            return res.status(403).json({ message: 'Chỉ admin mới có quyền tạo tài khoản admin' });
+        }
+    }
+
+    const newUser = new User(data);
+
+    try {
+        await newUser.save();
+        return res.status(201).send({
+            message: 'Create Successful'
         });
     } catch (error) {
         console.log('Error creating user:', error);
         return res.status(400).send({ message: 'Create Failed', error: error.message });
     }
-}
+};
+
 export const LoginUser = async (req, res) => {
     try {
         const { username, password } = req.body;
