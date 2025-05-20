@@ -51,7 +51,7 @@ export const createTask = async (req, res) => {
     try {
         const checkRole = req.token.role
         if (checkRole.toLowerCase() === 'user') { // self_create task
-            if (data.assignedTo.length > 0) {
+       if (Array.isArray(data.assignedTo) && data.assignedTo.length > 0) {
                 return res.status(403).json({ message: 'Users can only assign tasks to themselves' });
             }
             const newTask = new Task({

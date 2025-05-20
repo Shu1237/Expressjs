@@ -91,7 +91,6 @@ export const createTaskSchema = checkSchema({
     isMongoId: {
       errorMessage: 'assignedTo must be a valid MongoDB ObjectId',
     },
-    optional:true
   },
 });
 
