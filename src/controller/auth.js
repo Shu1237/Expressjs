@@ -62,7 +62,7 @@ export const getRegister = async (req, res) => {
     }
 
     data.password = hashPassword(data.password);
-    if (!data.role) {
+    if (data.role==='user') {
         data.role = 'user';
     }else {
          data.role = 'admin';
