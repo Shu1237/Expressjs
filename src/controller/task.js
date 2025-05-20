@@ -48,8 +48,10 @@ export const createTask = async (req, res) => {
         return res.status(400).send({ error: result.array() });
     }
     const data = matchedData(req);
+    console.log('data', data);
     try {
         const checkRole = req.token.role
+        console.log('checkRole', checkRole);
         if (checkRole.toLowerCase() === 'user') { // self_create task
        if (Array.isArray(data.assignedTo) && data.assignedTo.length > 0) {
                 return res.status(403).json({ message: 'Users can only assign tasks to themselves' });
@@ -68,14 +70,23 @@ export const createTask = async (req, res) => {
                     ? [data.assignedTo]
                     : [];
 
-            for (const userId of assignedIds) {
+          if (assignedIds.length > 0) {
+              for (const userId of assignedIds) {
+                  const task = new Task({
+                      ...data,
+                      assignedTo: userId,
+                      createdBy: req.token.id,
+                  });
+                  await task.save();
+              }
+          }else {
                 const task = new Task({
                     ...data,
-                    assignedTo: userId,
+                    assignedTo: req.token.id,
                     createdBy: req.token.id,
                 });
                 await task.save();
-            }
+          }
         }
 
         return res.status(201).send({
