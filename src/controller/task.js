@@ -151,9 +151,6 @@ export const updateTaskStatus = async (req, res) => {
     try {
        switch (task.status) {
         case 'todo':
-        task.status = 'in_progress';
-        break;
-        case 'in_progress':
         task.status = 'done';
         break;
         case 'cancel':
