@@ -46,7 +46,7 @@ export const createTaskSchema = checkSchema({
       options: (value) => {
         const today = new Date();
         const startDate = new Date(value);
-        if (startDate < today) {
+        if (startDate <= today) {
           throw new Error('Start date must be in the future');
         }
         return true;
