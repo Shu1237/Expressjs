@@ -17,24 +17,35 @@ export const getAllTasks = async (req, res) => {
     }
 
     try {
-        const tasks = await Task.find(query)
-            .populate('assignedTo', 'fullname')
-            .populate('createdBy', 'fullname');
+           const tasks = await Task.find(query)
+        .populate('assignedTo', 'fullname username')
+        .populate('createdBy', 'fullname username');
+    const formattedTasks = tasks.map(task => ({
+        _id: task._id,
+        title: task.title,
+        description: task.description,
+        startDate: task.startDate,
+        dueDate: task.dueDate,
+        status: task.status,
+        assignedTo: task.assignedTo
+            ? {
+                _id: task.assignedTo._id,
+                fullname: task.assignedTo.fullname,
+                username: task.assignedTo.username
+              }
+            : null,
+        createdBy: task.createdBy
+            ? {
+                _id: task.createdBy._id,
+                fullname: task.createdBy.fullname,
+                username: task.createdBy.username
+              }
+            : null,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+    }));
 
-        const formattedTasks = tasks.map(task => ({
-            _id: task._id,
-            title: task.title,
-            description: task.description,
-            startDate: task.startDate,
-            dueDate: task.dueDate,
-            status: task.status,
-            assignedTo: task.assignedTo?.fullname || null,
-            createdBy: task.createdBy?.fullname || null,
-            createdAt: task.createdAt,
-            updatedAt: task.updatedAt,
-        }));
-
-        res.status(200).send(formattedTasks);
+    res.status(200).send(formattedTasks);
     } catch (error) {
         console.error(error);
         res.status(500).send({ msg: 'Internal server error', error });

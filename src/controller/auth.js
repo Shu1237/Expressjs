@@ -10,41 +10,41 @@ export const Home = async (req, res) => {
     if (!token) {
         return res.status(200).send({ msg: 'Welcome! Please login.' });
     }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+   
+   try {
+    const tasks = await Task.find()
+        .populate('assignedTo', 'fullname username')
+        .populate('createdBy', 'fullname username');
+    const formattedTasks = tasks.map(task => ({
+        _id: task._id,
+        title: task.title,
+        description: task.description,
+        startDate: task.startDate,
+        dueDate: task.dueDate,
+        status: task.status,
+        assignedTo: task.assignedTo
+            ? {
+                _id: task.assignedTo._id,
+                fullname: task.assignedTo.fullname,
+                username: task.assignedTo.username
+              }
+            : null,
+        createdBy: task.createdBy
+            ? {
+                _id: task.createdBy._id,
+                fullname: task.createdBy.fullname,
+                username: task.createdBy.username
+              }
+            : null,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+    }));
 
-        const user = await User.findById(decoded.id)
-        if (!user) {
-            return res.status(404).send({ msg: 'User not found. Please login again.' });
-        }
-        const listtask = await Task.find({ assignedTo: decoded.id })
-            .populate('assignedTo', 'fullname')
-            .populate('createdBy', 'fullname');
-        const filterTask = listtask.filter((task) => task.status !== 'cancel')
-        const formattedTasks = filterTask.map(task => ({
-            _id: task._id,
-            title: task.title,
-            description: task.description,
-            startDate: task.startDate,
-            dueDate: task.dueDate,
-            status: task.status,
-            assignedTo: task.assignedTo?.fullname || null,
-            createdBy: task.createdBy?.fullname || null,
-            createdAt: task.createdAt,
-            updatedAt: task.updatedAt,
-        }));
-
-
-
-        return res.status(200).send({
-            msg: listtask.length === 0 ? `Welcome ${user.fullname}.Not found your tasks` : `Welcome ${user.fullname}`,
-            tasks: formattedTasks,
-        });
-
-    } catch (err) {
-        console.error('JWT Error:', err.message);
-        return res.status(401).send({ msg: 'Invalid or expired token. Please login again.' });
-    }
+    res.status(200).send(formattedTasks);
+} catch (error) {
+    console.error(error);
+    res.status(500).send({ msg: 'Internal server error', error });
+}
 };
 export const getRegister = async (req, res) => {
     const result = validationResult(req);

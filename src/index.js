@@ -25,5 +25,5 @@ app.use('/api-docs', swaggerUi.serve,swaggerUi.setup(swaggerSpec));
 app.listen(PORT, () => {
    const url = `http://localhost:${PORT}/api-docs`;
   console.log(`Running on Port ${PORT}`)
-   open(url); 
+   // open(url); 
 });
