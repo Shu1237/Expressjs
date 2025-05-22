@@ -93,7 +93,7 @@ export const LoginUser = async (req, res) => {
         const { username, password } = req.body;
         const findUser = await User.findOne({ username });
         if (!findUser) return res.status(404).send("Not found user");
-        if(!findUser.status.toLocaleLowerCase() === 'inactive') return res.status(400).send({ msg: 'Your account is not active' });
+        if(findUser.status.toLocaleLowerCase() === 'inactive') return res.status(400).send({ msg: 'Your account is not active' });
 
         const isMatch = await comparedPassword(password, findUser.password);
         if (!isMatch) return res.status(400).send({ msg: 'Wrong password' });
